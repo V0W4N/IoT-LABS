@@ -7,8 +7,8 @@
 
 // #define LAB_TEST
 // #define LAB_0
-#define LAB_1_1
-// #define LAB_1_2
+// #define LAB_1_1
+ #define LAB_1_2
 // #define LAB_2_1
 // #define LAB_2_2
 // #define LAB_3_1

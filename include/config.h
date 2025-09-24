@@ -12,5 +12,7 @@
 #define SCANF_BUFFER_SIZE 32
 #define SCANF_READ_TEXT_FORMAT "%31s"  
 
+#define GREEN_LED_PIN 12
+#define RED_LED_PIN 11
 
 #endif

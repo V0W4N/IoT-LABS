@@ -3,21 +3,35 @@
   "author": "V0W4N _",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-led", "id": "led1", "top": -90, "left": 99.8, "attrs": { "color": "red" } },
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 67.8, "left": -96.6, "attrs": {} },
     {
-      "type": "wokwi-pushbutton",
-      "id": "btn1",
-      "top": -61,
-      "left": 163.2,
-      "attrs": { "color": "green", "xray": "1" }
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": 275.2,
+      "left": 178.4,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-membrane-keypad",
+      "id": "keypad1",
+      "top": -299.6,
+      "left": -32.8,
+      "attrs": {}
     }
   ],
   "connections": [
-    [ "led1:C", "uno:GND.1", "green", [ "v0" ] ],
-    [ "led1:A", "uno:13", "green", [ "v0" ] ],
-    [ "btn1:2.l", "uno:GND.1", "green", [ "h0" ] ],
-    [ "uno:2", "btn1:1.r", "green", [ "v0" ] ]
+    [ "lcd1:GND", "uno:GND.3", "black", [ "h0" ] ],
+    [ "lcd1:VCC", "uno:5V", "red", [ "h0" ] ],
+    [ "keypad1:C4", "uno:2", "green", [ "v0" ] ],
+    [ "keypad1:C3", "uno:3", "green", [ "v0" ] ],
+    [ "keypad1:C2", "uno:4", "green", [ "v0" ] ],
+    [ "keypad1:C1", "uno:5", "green", [ "v0" ] ],
+    [ "keypad1:R4", "uno:6", "green", [ "v0" ] ],
+    [ "keypad1:R3", "uno:7", "green", [ "v0" ] ],
+    [ "keypad1:R2", "uno:8", "green", [ "v0" ] ],
+    [ "keypad1:R1", "uno:9", "green", [ "v0" ] ],
+    [ "lcd1:SDA", "uno:A4", "green", [ "h0" ] ],
+    [ "lcd1:SCL", "uno:A5", "green", [ "h0" ] ]
   ],
   "dependencies": {}
 }
