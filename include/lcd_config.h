@@ -32,7 +32,6 @@ public:
         if (lcd != nullptr) {
             lcd->clear();
             lcd->noBacklight();
-            delete lcd;
         }
     }
 };
