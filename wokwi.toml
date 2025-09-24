@@ -1,0 +1,12 @@
+[wokwi]
+version = 1
+firmware = ".pio/build/wokwi/firmware.hex"
+elf = ".pio/build/wokwi/firmware.elf"
+
+[[pins]]
+name = "LED"
+number = 13
+
+# Optional: Configure serial monitor
+[serial]
+monitor_speed = 115200
