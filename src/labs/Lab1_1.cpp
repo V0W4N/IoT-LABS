@@ -5,12 +5,11 @@
 #include "interactive_scanf.h"
 #include "serial_stdio.h"  // Add this include
 
-#define LED_PIN DEFAULT_LED_PIN
-#define BUTTON_PIN DEFAULT_BUTTON_PIN
+#define LED_PIN 12
+#define BUTTON_PIN 2
 
 #define LED_ON_COMMAND "led_on"
 #define LED_OFF_COMMAND "led_off"
-#define LED_TOGGLE_COMMAND "led_toggle"
 #define EXIT_COMMAND "exit"
 #define IS_LED_ON_COMMAND "status"
 

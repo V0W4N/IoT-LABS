@@ -19,7 +19,7 @@ public:
 
     static void displayMessage(LiquidCrystal_I2C* lcd, const char* message, uint8_t row) {
         lcd->setCursor(0, row);
-        lcd->print("                "); // Clear the line first
+        lcd->print("                ");
         lcd->setCursor(0, row);
         lcd->print(message);
     }

@@ -3,11 +3,9 @@
 
 #include <Keypad.h>
 
-// Keypad dimensions
 #define KEYPAD_ROWS 4
 #define KEYPAD_COLS 4
 
-// Keypad layout
 const char KEYPAD_KEYS[KEYPAD_ROWS][KEYPAD_COLS] = {
     {'1', '2', '3', 'A'},
     {'4', '5', '6', 'B'},
@@ -15,12 +13,10 @@ const char KEYPAD_KEYS[KEYPAD_ROWS][KEYPAD_COLS] = {
     {'*', '0', '#', 'D'}
 };
 
-// Pin configuration
 const byte ROW_PINS[KEYPAD_ROWS] = {9, 8, 7, 6};
 const byte COL_PINS[KEYPAD_COLS] = {5, 4, 3, 2};
 
-// Create keypad instance
-inline Keypad& getKeypad() {
+class Keypad& getKeypad() {
     static Keypad keypad = Keypad(makeKeymap(KEYPAD_KEYS), 
                                  (byte*)ROW_PINS, 
                                  (byte*)COL_PINS, 

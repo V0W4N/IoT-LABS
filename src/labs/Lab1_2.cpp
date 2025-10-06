@@ -31,10 +31,8 @@ void handleKeyPress(char key) {
         enteredCode += key;
         LCDConfig::displayMessage(lcd, enteredCode.c_str(), 1);
     } else if (!isdigit(key)) {
-        // Ignore non-digit keys except * and #
         return;
     } else {
-        // Code length exceeded
         LCDConfig::displayMessage(lcd, "Max length!", 1);
         delay(1000);
         LCDConfig::displayMessage(lcd, enteredCode.c_str(), 1);
