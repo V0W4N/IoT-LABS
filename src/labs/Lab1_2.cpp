@@ -1,102 +1,117 @@
 #ifdef LAB_1_2
 #include <Arduino.h>
-#include "lcd_config.h"
-#include "keypad_config.h"
+#include "keypad_lcd_stdio_config.h"  // Includes initWithConfig() implementation
 #include "my_led.h"
 #include "config.h"
 
-// Constants
-#define CODE_LENGTH 4
 #define CORRECT_CODE "1234"
+#define MAX_CODE_LENGTH 10
 
-// Global objects
+#define SECRET_INPUT  // To hide code input on LCD
+
+// Lab 1.2: Code verification system with 4x4 keypad and LCD display via STDIO
+
 LedUtils greenLed(GREEN_LED_PIN);
 LedUtils redLed(RED_LED_PIN);
-LiquidCrystal_I2C* lcd;
+
 String enteredCode = "";
 
-void(* resetFunc) (void) = 0;
+void resetBoard() {
+    void(* resetFunc) (void) = 0; //declare reset function @ address 0
+    resetFunc(); //call reset
+}
 
 void setup() {
-    lcd = LCDConfig::initLCD();
-    LCDConfig::displayMessage(lcd, "Enter code:", 0);
+    // Initialize STDIO wrapper for keypad and LCD display
+    KeypadLCDStdio::initWithConfig();
     
+    // Initialize LEDs
     greenLed.turnOff();
     redLed.turnOff();
-}
-
-
-void handleKeyPress(char key) {
-    if (enteredCode.length() < CODE_LENGTH && isdigit(key)) {
-        enteredCode += key;
-        LCDConfig::displayMessage(lcd, enteredCode.c_str(), 1);
-    } else if (!isdigit(key)) {
-        return;
-    } else {
-        LCDConfig::displayMessage(lcd, "Max length!", 1);
-        delay(1000);
-        LCDConfig::displayMessage(lcd, enteredCode.c_str(), 1);
-    }
-}
-
-void resetInput() {
-    enteredCode = "";
-    LCDConfig::clearDisplay(lcd);
-    LCDConfig::displayMessage(lcd, "Enter code:", 0);
-    greenLed.turnOff();
-    redLed.turnOff();
-}
-
-void resetSystem() {
-    greenLed.turnOff();
-    redLed.turnOff();
-    LCDConfig::cleanup(lcd);
-    resetFunc();
-}
-
-
-void validateCode() {
-    bool isCorrect = (enteredCode == CORRECT_CODE);
-    LCDConfig::clearDisplay(lcd);
     
-    if (enteredCode.length() < CODE_LENGTH) {
-        LCDConfig::displayMessage(lcd, "Code incomplete!", 0);
-        delay(1000);
-        resetInput();
-        return;
-    }
+    // Flush display first
+    printf("\f");
     
-    LCDConfig::displayMessage(lcd, isCorrect ? "Correct!" : "Incorrect!", 0);
-    
-    if (isCorrect) {
-        greenLed.turnOn();
-        redLed.turnOff();
-    } else {
-        redLed.turnOn();
-        greenLed.turnOff();
-    }
-    
+    // Show first screen
+    printf("Lab 1.2");
+    printf("\n4-digit code");
     delay(2000);
-    resetSystem();
+    
+    // Flush (clear) and show second screen
+    printf("\f");
+    printf("# to confirm");
+    printf("\n* to clear");
+    delay(2000);
+    
+    // Flush (clear) and show input prompt
+    printf("\f");
+    printf("Code: ");
 }
 
 void loop() {
-    char key = getKeypad().getKey();
+    delay(10); // Small delay for stability
     
-    if (key) {
-        switch (key) {
-            case '#':
-                validateCode();
-                break;
-            case '*':
-                resetInput();
-                break;
-            default:
-                handleKeyPress(key);
-                break;
+    // Read character directly from STDIO (blocking call)
+    char c = getchar();
+    
+    if (c != EOF && c != '\0') {
+        if (c == '#') {
+            // Check code when # is pressed
+            printf("\f");
+            printf("Checking code...");
+            delay(1000);
+            
+            if (enteredCode == CORRECT_CODE) {
+                printf("\f");
+                printf("Access granted!");
+                greenLed.turnOn();
+                redLed.turnOff();
+            } else {
+                printf("\f");
+                printf("Access denied!");
+                redLed.turnOn();
+                greenLed.turnOff();
+            }
+            
+            // Reset after 3 seconds
+            delay(3000);
+            printf("\f");
+            resetBoard();
+
+            
+        } else if (c == '*') {
+            // Clear input when * is pressed
+            enteredCode = "";
+            printf("\f");
+            printf("Code cleared");
+            delay(1000);
+            printf("\f");
+            printf("Code: ");
+            
+        } else if (c >= '0' && c <= '9') {
+            // Add digit to code
+            if (enteredCode.length() < MAX_CODE_LENGTH) {
+                enteredCode += c;
+            }
+            /*
+#ifdef SECRET_INPUT
+            if (enteredCode.length() < MAX_CODE_LENGTH) {
+                enteredCode += c;
+                printf("\f");
+                printf("Code: ");
+                for (size_t i = 0; i < enteredCode.length(); i++) {
+                    printf("*");
+                }
+            }
+#else
+            if (enteredCode.length() < MAX_CODE_LENGTH) {
+                enteredCode += c;
+                printf("\f");
+                printf("Code: %s", enteredCode.c_str());
+            }
+#endif
+*/
         }
     }
-    delay(50); // Debounce delay
 }
-
 #endif

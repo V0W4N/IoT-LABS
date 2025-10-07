@@ -1,7 +1,7 @@
 #ifndef KEYPAD_CONFIG_H
 #define KEYPAD_CONFIG_H
 
-#include <Keypad.h>
+#include <Arduino.h>
 
 #define KEYPAD_ROWS 4
 #define KEYPAD_COLS 4
@@ -15,14 +15,5 @@ const char KEYPAD_KEYS[KEYPAD_ROWS][KEYPAD_COLS] = {
 
 const byte ROW_PINS[KEYPAD_ROWS] = {9, 8, 7, 6};
 const byte COL_PINS[KEYPAD_COLS] = {5, 4, 3, 2};
-
-class Keypad& getKeypad() {
-    static Keypad keypad = Keypad(makeKeymap(KEYPAD_KEYS), 
-                                 (byte*)ROW_PINS, 
-                                 (byte*)COL_PINS, 
-                                 KEYPAD_ROWS, 
-                                 KEYPAD_COLS);
-    return keypad;
-}
 
 #endif

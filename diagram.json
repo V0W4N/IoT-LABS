@@ -17,6 +17,27 @@
       "top": -299.6,
       "left": -32.8,
       "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 207.6,
+      "left": 243.8,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": 207.6,
+      "left": 378.2,
+      "attrs": { "color": "limegreen" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 253.55,
+      "left": 182.4,
+      "attrs": { "value": "1000" }
     }
   ],
   "connections": [
@@ -31,7 +52,12 @@
     [ "keypad1:R2", "uno:8", "green", [ "v0" ] ],
     [ "keypad1:R1", "uno:9", "green", [ "v0" ] ],
     [ "lcd1:SDA", "uno:A4", "green", [ "h0" ] ],
-    [ "lcd1:SCL", "uno:A5", "green", [ "h0" ] ]
+    [ "lcd1:SCL", "uno:A5", "green", [ "h0" ] ],
+    [ "r1:1", "uno:GND.2", "black", [ "v0" ] ],
+    [ "led1:C", "r1:2", "black", [ "v0" ] ],
+    [ "led2:C", "r1:2", "black", [ "v0" ] ],
+    [ "uno:12", "led2:A", "green", [ "v0" ] ],
+    [ "uno:11", "led1:A", "red", [ "v0" ] ]
   ],
   "dependencies": {}
 }

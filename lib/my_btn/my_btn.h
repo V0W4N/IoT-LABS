@@ -4,18 +4,18 @@
 #include <Arduino.h>
 
 class ButtonUtils {
+protected:
+    const int buttonPin;
+    bool lastState;
+    bool currentState;
+    const bool pullupMode;
+
 public:
     explicit ButtonUtils(const int pin, const bool pullup = true);
     bool isPressed();
     bool btnPressed();
     bool btnUnPressed();
     void update();
-    
-protected:
-    const int buttonPin;
-    bool lastState;
-    bool currentState;
-    const bool pullupMode;
 };
 
 #endif
