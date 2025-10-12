@@ -11,8 +11,9 @@
 
 // Lab 1.2: Code verification system with 4x4 keypad and LCD display via STDIO
 
-LedUtils greenLed(GREEN_LED_PIN);
-LedUtils redLed(RED_LED_PIN);
+// LED structures (C-style)
+Led greenLed;
+Led redLed;
 
 String enteredCode = "";
 
@@ -25,9 +26,13 @@ void setup() {
     // Initialize STDIO wrapper for keypad and LCD display
     KeypadLCDStdio::initWithConfig();
     
-    // Initialize LEDs
-    greenLed.turnOff();
-    redLed.turnOff();
+    // Initialize LEDs (C-style)
+    led_init(&greenLed, GREEN_LED_PIN);
+    led_init(&redLed, RED_LED_PIN);
+    
+    // Turn off LEDs initially
+    led_turn_off(&greenLed);
+    led_turn_off(&redLed);
     
     // Flush display first
     printf("\f");
@@ -64,13 +69,13 @@ void loop() {
             if (enteredCode == CORRECT_CODE) {
                 printf("\f");
                 printf("Access granted!");
-                greenLed.turnOn();
-                redLed.turnOff();
+                led_turn_on(&greenLed);
+                led_turn_off(&redLed);
             } else {
                 printf("\f");
                 printf("Access denied!");
-                redLed.turnOn();
-                greenLed.turnOff();
+                led_turn_on(&redLed);
+                led_turn_off(&greenLed);
             }
             
             // Reset after 3 seconds
