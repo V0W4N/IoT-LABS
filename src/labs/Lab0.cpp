@@ -7,7 +7,7 @@
 #include "milis_utils.h"
 #include "config.h"
 
-#define LED_PIN DEFAULT_LED_PIN
+#define LED_PIN 13
 #define BUTTON_PIN DEFAULT_BUTTON_PIN
 
 

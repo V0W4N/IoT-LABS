@@ -59,7 +59,7 @@ void Task1_ButtonAndLED(void *pvParameters) {
     // Initialize the xLastWakeTime variable with the current time
     xLastWakeTime = xTaskGetTickCount();
     
-    for (;;) {
+    while (1) {
         // Read button with debouncing
         bool btnReading = digitalRead(BTN1_PIN);
         
@@ -109,7 +109,7 @@ void Task1_ButtonAndLED(void *pvParameters) {
 void Task2_SynchronousTask(void *pvParameters) {
     (void) pvParameters;  // Unused parameter
     
-    for (;;) {
+    while (1) {
         // Wait for semaphore from Task 1 (blocking wait)
         if (xSemaphoreTake(buttonSemaphore, portMAX_DELAY) == pdTRUE) {
             // Semaphore received - button was pressed
@@ -170,7 +170,7 @@ void Task3_BufferReader(void *pvParameters) {
     // Initialize the xLastWakeTime variable with the current time
     xLastWakeTime = xTaskGetTickCount();
     
-    for (;;) {
+    while (1) {
         uint8_t receivedByte;
         
         // Try to receive data from queue (non-blocking check)

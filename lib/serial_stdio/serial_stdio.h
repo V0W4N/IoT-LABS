@@ -4,7 +4,10 @@
 #include <Arduino.h>
 
 // Initialize stdio redirection to Serial
-void initSerialStdio(unsigned long baudRate);
+void initSerialStdio(unsigned long baudRate, bool echoEnabled = true);
+
+// Enable or disable echo for input
+void setSerialEcho(bool enabled);
 
 // Custom putchar function for stdio
 int serialPutchar(char c, FILE *file);

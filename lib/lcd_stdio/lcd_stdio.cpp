@@ -52,25 +52,24 @@ void LCDStdio::clear() {
 int LCDStdio::putcharlcd(char c, FILE* file) {
     if (!lcd) return -1;
     
-    // Handle special characters
     switch (c) {
-        case '\n':  // Newline
+        case '\n':
             handleNewline();
             break;
             
-        case '\r':  // Carriage return
+        case '\r':
             handleCarriageReturn();
             break;
             
-        case '\f':  // Form feed (clear screen)
+        case '\f':
             handleFormFeed();
             break;
             
-        case '\t':  // Tab (4 spaces)
+        case '\t':
             handleTab();
             break;
             
-        case '\b':  // Backspace
+        case '\b':
             if (cursorCol > 0) {
                 cursorCol--;
                 lcd->setCursor(cursorCol, cursorRow);
@@ -153,8 +152,6 @@ void LCDStdio::advanceCursor() {
 }
 
 void LCDStdio::scrollUp() {
-    // Simple scroll: just clear screen and go to first line
-    // More complex scrolling would require a buffer
     lcd->clear();
     cursorRow = 0;
     cursorCol = 0;

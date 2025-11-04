@@ -3,15 +3,15 @@
 #include "config.h"
 #include "serial_stdio.h"
 
-// Lab 2.1 - Sequential Task Execution with Provider/Consumer Model
-// Non-preemptive scheduler with 3 tasks and idle reporting
+// Lab 2.1 - Interrupt-Driven Task Execution with Provider/Consumer Model
+// Using Timer1 interrupt for scheduler and External/Pin Change interrupts for buttons
 
 // ============================================================================
 // HARDWARE CONFIGURATION
 // ============================================================================
-#define BTN1_PIN 2          // Button for Task 1 (toggle LED1)
-#define BTN2_PIN 3          // Button for Task 3 (increment counter)
-#define BTN3_PIN 4          // Button for Task 3 (decrement counter)
+#define BTN1_PIN 20         // Button for Task 1 (toggle LED1) - INT4
+#define BTN2_PIN 19         // Button for Task 3 (increment counter) - INT5
+#define BTN3_PIN 18         // Button for Task 3 (decrement counter) - INT0
 #define LED1_PIN 13         // LED for Task 1 (toggle on button press)
 #define LED2_PIN 12         // LED for Task 2 (blink when LED1 is OFF)
 
@@ -19,85 +19,98 @@
 // ============================================================================
 // TASK STRUCTURE
 // ============================================================================
+typedef void (*TaskFunction)(void);  // Function pointer type for task execution
+
 struct Task {
+    const char* name;          // Task name for debugging
     unsigned long period;      // Period in milliseconds (recurrence)
     unsigned long offset;      // Offset from start (initial delay)
-    unsigned long lastRun;     // Last execution time
+    volatile unsigned long lastRun;     // Last execution time
+    volatile bool needsExecution;       // Flag set by timer interrupt
     bool firstRun;             // Flag for first execution
+    TaskFunction execute;      // Function to execute
 };
 
 // ============================================================================
 // GLOBAL VARIABLES (Provider/Consumer Model)
 // ============================================================================
 // Task 1 state (Provider)
-bool led1_state = false;           // Current state of LED1
+volatile bool led1_state = false;           // Current state of LED1
 
 // Task 2 state (Provider)
-bool led2_state = false;           // Current state of LED2
-unsigned long led2_onTime = 0;     // Time LED2 has been ON (ms)
-unsigned long led2_offTime = 0;    // Time LED2 has been OFF (ms)
-unsigned long led2_lastChange = 0; // Last time LED2 changed state
+volatile bool led2_state = false;           // Current state of LED2
+volatile unsigned long led2_onTime = 0;     // Time LED2 has been ON (ms)
+volatile unsigned long led2_offTime = 0;    // Time LED2 has been OFF (ms)
+volatile unsigned long led2_lastChange = 0; // Last time LED2 changed state
 
 // Task 3 state (Provider)
-int counter = 0;                   // Counter value
+volatile int counter = 0;                   // Counter value
 
-// Button states (for debouncing)
-bool btnLastStates[3] = {HIGH, HIGH, HIGH}; // BTN1, BTN2, BTN3
-bool btnLastStableStates[3] = {HIGH, HIGH, HIGH};
-unsigned long btnLastDebounceTime[3] = {0, 0, 0};
-const unsigned long DEBOUNCE_DELAY = 50;
+// Button interrupt flags
+volatile bool btn1_pressed = false;
+volatile bool btn2_pressed = false;
+volatile bool btn3_pressed = false;
 
-// Helper function to get button index from pin
-int getButtonIndex(int btnPin) {
-    switch(btnPin) {
-        case BTN1_PIN: return 0;
-        case BTN2_PIN: return 1;
-        case BTN3_PIN: return 2;
-        default: return -1;
+// Timing
+volatile unsigned long systemTicks = 0;     // 1ms tick counter
+
+// ============================================================================
+// FORWARD DECLARATIONS
+// ============================================================================
+void executeTask1();
+void executeTask2();
+void executeTask3();
+void executeIdleTask();
+
+// ============================================================================
+// TASK LIST
+// ============================================================================
+#define NUM_TASKS 4
+
+Task taskList[NUM_TASKS] = {
+    {"Task1_Button",  20,   0,   0, false, true, executeTask1},    // Check button every 20ms
+    {"Task2_Blink",   500,  10,  0, false, true, executeTask2},    // Blink every 500ms
+    {"Task3_Counter", 30,   20,  0, false, true, executeTask3},    // Check buttons every 30ms
+    {"TaskIdle",      1000, 100, 0, false, true, executeIdleTask}  // Report every 1000ms
+};
+
+// ============================================================================
+// TIMER1 INTERRUPT - 1ms tick for scheduler
+// ============================================================================
+ISR(TIMER1_COMPA_vect) {
+    systemTicks++;
+    unsigned long currentTime = systemTicks;
+    
+    // Check all tasks in the list
+    for (uint8_t i = 0; i < NUM_TASKS; i++) {
+        Task* task = &taskList[i];
+        
+        // First run check
+        if (task->firstRun && currentTime >= task->offset) {
+            task->needsExecution = true;
+        }
+        // Periodic execution check
+        else if (!task->firstRun && (currentTime - task->lastRun >= task->period)) {
+            task->needsExecution = true;
+        }
     }
 }
 
-bool debounceButton(int btnPin, bool riseEdgeMode = false) {
-    int btnIndex = getButtonIndex(btnPin);
-    if (btnIndex < 0) return false; // Invalid pin
+// ============================================================================
+// INTERRUPT SERVICE ROUTINES (ISRs)
+// ============================================================================
 
-    bool btnReading = digitalRead(btnPin);
-    
-    bool isFallEdge = false;
-    bool isRiseEdge = false;
-    
-    // Reset timer on any state change
-    if (btnReading != btnLastStates[btnIndex]) {
-        btnLastDebounceTime[btnIndex] = millis();
-    }
-    
-    // Only act if signal has been stable for DEBOUNCE_DELAY
-    if ((millis() - btnLastDebounceTime[btnIndex]) > DEBOUNCE_DELAY) {
-        // Check for falling edge (button press)
-        if (btnReading == LOW && btnLastStableStates[btnIndex] == HIGH) {
-            btnLastStableStates[btnIndex] = LOW;
-            isFallEdge = true;
-        }
-        // Check for rising edge (button release)
-        if (btnReading == HIGH && btnLastStableStates[btnIndex] == LOW) {
-            btnLastStableStates[btnIndex] = HIGH;
-            isRiseEdge = true;
-        }
-    }
-    
-    // Always update the last reading
-    btnLastStates[btnIndex] = btnReading;
-    
-    return riseEdgeMode ? isRiseEdge : isFallEdge;
+void btn1_ISR() {
+    btn1_pressed = true;
 }
 
-// ============================================================================
-// TASK INSTANCES
-// ============================================================================
-Task task1;  // Button and LED toggle
-Task task2;  // Blinking LED
-Task task3;  // Counter with two buttons
-Task taskIdle; // Reporting/monitoring task
+void btn2_ISR() {
+    btn2_pressed = true;
+}
+
+void btn3_ISR() {
+    btn3_pressed = true;
+}
 
 // ============================================================================
 // TASK IMPLEMENTATIONS
@@ -105,18 +118,41 @@ Task taskIdle; // Reporting/monitoring task
 
 /**
  * Task 1: Button and LED Toggle
- * - Detects button press on BTN1_PIN
+ * - Detects button press on BTN1_PIN via interrupt flag
  * - Toggles LED1 state
  * - Provider: updates led1_state
  */
 void executeTask1() {
-    // Read button with debouncing
-    bool fallingEdge = debounceButton(BTN1_PIN);
-
-    if (fallingEdge) {
-        // Button pressed (falling edge)
-        led1_state = !led1_state;
-        digitalWrite(LED1_PIN, led1_state ? HIGH : LOW);
+    static bool btnLastState = HIGH;
+    static unsigned long btnLastDebounce = 0;
+    const unsigned long DEBOUNCE_DELAY = 50;
+    
+    // Check interrupt flag
+    bool btnPressed = false;
+    noInterrupts();
+    if (btn1_pressed) {
+        btn1_pressed = false;
+        btnPressed = true;
+    }
+    interrupts();
+    
+    // Debounce logic
+    if (btnPressed) {
+        unsigned long currentTime = systemTicks;
+        if ((currentTime - btnLastDebounce) > DEBOUNCE_DELAY) {
+            if (btnLastState == HIGH) {
+                // Toggle LED1
+                led1_state = !led1_state;
+                digitalWrite(LED1_PIN, led1_state ? HIGH : LOW);
+                btnLastState = LOW;
+            }
+            btnLastDebounce = currentTime;
+        }
+    } else {
+        // Check if button released
+        if (digitalRead(BTN1_PIN) == HIGH) {
+            btnLastState = HIGH;
+        }
     }
 }
 
@@ -134,7 +170,7 @@ void executeTask2() {
         digitalWrite(LED2_PIN, led2_state ? HIGH : LOW);
         
         // Track time in current state
-        unsigned long currentTime = millis();
+        unsigned long currentTime = systemTicks;
         if (led2_state) {
             led2_offTime += (currentTime - led2_lastChange);
         } else {
@@ -144,7 +180,7 @@ void executeTask2() {
     } else {
         // LED1 is ON, turn off LED2
         if (led2_state) {
-            unsigned long currentTime = millis();
+            unsigned long currentTime = systemTicks;
             led2_onTime += (currentTime - led2_lastChange);
             led2_lastChange = currentTime;
         }
@@ -155,22 +191,63 @@ void executeTask2() {
 
 /**
  * Task 3: Counter Control
- * - BTN2 increments counter
- * - BTN3 decrements counter
+ * - BTN2 increments counter (via interrupt flag)
+ * - BTN3 decrements counter (via interrupt flag)
  * - Provider: updates counter
- * - Consumer: could use led2_state information
  */
 void executeTask3() {
-    // Read BTN2 (increment)
-    bool btn2Reading = debounceButton(BTN2_PIN);
-    if (btn2Reading) {
-        counter++;
+    static bool btn2LastState = HIGH;
+    static bool btn3LastState = HIGH;
+    static unsigned long btn2LastDebounce = 0;
+    static unsigned long btn3LastDebounce = 0;
+    const unsigned long DEBOUNCE_DELAY = 50;
+    
+    unsigned long currentTime = systemTicks;
+    
+    // Handle BTN2 (increment)
+    bool btn2Pressed = false;
+    noInterrupts();
+    if (btn2_pressed) {
+        btn2_pressed = false;
+        btn2Pressed = true;
+    }
+    interrupts();
+    
+    if (btn2Pressed) {
+        if ((currentTime - btn2LastDebounce) > DEBOUNCE_DELAY) {
+            if (btn2LastState == HIGH) {
+                counter++;
+                btn2LastState = LOW;
+            }
+            btn2LastDebounce = currentTime;
+        }
+    } else {
+        if (digitalRead(BTN2_PIN) == HIGH) {
+            btn2LastState = HIGH;
+        }
     }
     
-    // Read BTN3 (decrement)
-    bool btn3Reading = debounceButton(BTN3_PIN);
-    if (btn3Reading) {
-        counter--;
+    // Handle BTN3 (decrement)
+    bool btn3Pressed = false;
+    noInterrupts();
+    if (btn3_pressed) {
+        btn3_pressed = false;
+        btn3Pressed = true;
+    }
+    interrupts();
+    
+    if (btn3Pressed) {
+        if ((currentTime - btn3LastDebounce) > DEBOUNCE_DELAY) {
+            if (btn3LastState == HIGH) {
+                counter--;
+                btn3LastState = LOW;
+            }
+            btn3LastDebounce = currentTime;
+        }
+    } else {
+        if (digitalRead(BTN3_PIN) == HIGH) {
+            btn3LastState = HIGH;
+        }
     }
 }
 
@@ -181,43 +258,61 @@ void executeTask3() {
  */
 void executeIdleTask() {
     // Use \r\n for proper carriage return in Serial monitor
-    printf("\r\n=== Lab 2.1 Status ===\r\n");
+    printf("\r\n=== Lab 2.1 Status (Interrupt-Driven) ===\r\n");
     printf("LED1: %s\r\n", led1_state ? "ON " : "OFF");
     printf("LED2: %s\r\n", led2_state ? "ON " : "OFF");
     printf("Counter: %d\r\n", counter);
     printf("LED2 ON:  %lu ms\r\n", led2_onTime);
     printf("LED2 OFF: %lu ms\r\n", led2_offTime);
-    printf("Uptime: %lu ms\r\n", millis());
-    printf("=====================\r\n\r\n");
+    printf("Uptime: %lu ms\r\n", systemTicks);
+    printf("==========================================\r\n\r\n");
 }
 
 // ============================================================================
-// SCHEDULER
+// INTERRUPT SETUP FUNCTIONS
 // ============================================================================
 
-/**
- * Checks if a task should run based on its period and offset
- */
-bool shouldRunTask(Task* task) {
-    unsigned long currentTime = millis();
+void setupTimer1Interrupt() {
+    // Configure Timer1 for 1ms interrupt (1000 Hz)
+    // Using CTC mode (Clear Timer on Compare Match)
     
-    // First run check
-    if (task->firstRun) {
-        if (currentTime >= task->offset) {
-            task->firstRun = false;
-            task->lastRun = currentTime;
-            return true;
-        }
-        return false;
-    }
+    noInterrupts();  // Disable all interrupts
     
-    // Periodic execution
-    if (currentTime - task->lastRun >= task->period) {
-        task->lastRun = currentTime;
-        return true;
-    }
+    // Reset Timer1 control registers
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1 = 0;
     
-    return false;
+    // Set compare match register for 1ms (1000Hz)
+    // For 16MHz clock with prescaler 64:
+    // (16,000,000 Hz) / (64 * 1000 Hz) - 1 = 249
+    OCR1A = 249;
+    
+    // Turn on CTC mode
+    TCCR1B |= (1 << WGM12);
+    
+    // Set CS11 and CS10 bits for 64 prescaler
+    TCCR1B |= (1 << CS11) | (1 << CS10);
+    
+    // Enable timer compare interrupt
+    TIMSK1 |= (1 << OCIE1A);
+    
+    interrupts();  // Enable all interrupts
+}
+
+void setupExternalInterrupts() {
+    // Using attachInterrupt() for cleaner, more portable code
+    // Reference: https://docs.arduino.cc/language-reference/en/functions/external-interrupts/attachInterrupt/
+    
+    // BTN1 (Pin 2) - INT4 on Mega 2560
+    // digitalPinToInterrupt() converts pin number to interrupt number
+    attachInterrupt(digitalPinToInterrupt(BTN1_PIN), btn1_ISR, FALLING);
+    
+    // BTN2 (Pin 3) - INT5 on Mega 2560
+    attachInterrupt(digitalPinToInterrupt(BTN2_PIN), btn2_ISR, FALLING);
+    
+    // BTN3 (Pin 21) - INT0 on Mega 2560
+    attachInterrupt(digitalPinToInterrupt(BTN3_PIN), btn3_ISR, FALLING);
 }
 
 // ============================================================================
@@ -228,8 +323,11 @@ void setup() {
     // Initialize Serial for STDIO
     initSerialStdio(SERIAL_BAUD_RATE);
     
-    printf("Lab 2.1 - Sequential Task Scheduler\r\n");
-    printf("Initializing...\r\n");
+    printf("Lab 2.1 - Interrupt-Driven Task Scheduler\r\n");
+    printf("==========================================\r\n");
+    printf("Using Timer1 interrupt for scheduling\r\n");
+    printf("Using INT0, INT1, and PCINT for buttons\r\n");
+    printf("Initializing...\r\n\r\n");
     
     // Configure pins
     pinMode(BTN1_PIN, INPUT_PULLUP);
@@ -242,68 +340,55 @@ void setup() {
     digitalWrite(LED1_PIN, LOW);
     digitalWrite(LED2_PIN, LOW);
     
-    // Initialize task parameters
-    // Task 1: Check button every 20ms (50Hz for responsive input)
-    task1.period = 20;
-    task1.offset = 0;
-    task1.lastRun = 0;
-    task1.firstRun = true;
+    // Initialize LED2 timing
+    led2_lastChange = 0;
     
-    // Task 2: Blink every 500ms (2Hz)
-    task2.period = 500;
-    task2.offset = 10;  // Small offset to avoid collision
-    task2.lastRun = 0;
-    task2.firstRun = true;
-    led2_lastChange = millis();
-    
-    // Task 3: Check buttons every 30ms
-    task3.period = 30;
-    task3.offset = 20;  // Different offset
-    task3.lastRun = 0;
-    task3.firstRun = true;
-    
-    // Idle Task: Report every 1000ms (1Hz)
-    taskIdle.period = 1000;
-    taskIdle.offset = 100;  // Start after other tasks
-    taskIdle.lastRun = 0;
-    taskIdle.firstRun = true;
+    // Setup hardware interrupts
+    setupTimer1Interrupt();
+    setupExternalInterrupts();
     
     printf("Initialization complete!\r\n");
-    printf("BTN1 (pin %d): Toggle LED1\r\n", BTN1_PIN);
-    printf("BTN2 (pin %d): Increment counter\r\n", BTN2_PIN);
-    printf("BTN3 (pin %d): Decrement counter\r\n", BTN3_PIN);
+    printf("Number of tasks: %d\r\n\r\n", NUM_TASKS);
+    
+    // Print task information
+    for (uint8_t i = 0; i < NUM_TASKS; i++) {
+        printf("  [%d] %s: period=%lu ms, offset=%lu ms\r\n", 
+               i, taskList[i].name, taskList[i].period, taskList[i].offset);
+    }
+    
+    printf("\r\nHardware Configuration:\r\n");
+    printf("BTN1 (pin %d):  Toggle LED1 [attachInterrupt - FALLING]\r\n", BTN1_PIN);
+    printf("BTN2 (pin %d):  Increment counter [attachInterrupt - FALLING]\r\n", BTN2_PIN);
+    printf("BTN3 (pin %d):  Decrement counter [attachInterrupt - FALLING]\r\n", BTN3_PIN);
+    printf("Timer1:         1ms tick for scheduler [ISR]\r\n\r\n");
+    
     delay(500);
 }
 
 void loop() {
-    // Sequential (non-preemptive) task execution
-    // Each task runs to completion before the next one
+    // Interrupt-driven execution - iterate through task list
     
-    // Task 1: Button and LED
-    if (shouldRunTask(&task1)) {
-        executeTask1();
-
+    for (uint8_t i = 0; i < NUM_TASKS; i++) {
+        Task* task = &taskList[i];
+        
+        // Check if task needs execution
+        if (task->needsExecution) {
+            // Atomically clear flag and update timing
+            noInterrupts();
+            task->needsExecution = false;
+            task->lastRun = systemTicks;
+            task->firstRun = false;
+            interrupts();
+            
+            // Execute the task function
+            task->execute();
+        }
     }
     
-    // Task 2: Blinking LED
-    if (shouldRunTask(&task2)) {
-        executeTask2();
-    }
-    
-    // Task 3: Counter
-    if (shouldRunTask(&task3)) {
-        executeTask3();
-    }
-    
-    // Idle Task: Reporting
-    if (shouldRunTask(&taskIdle)) {
-        executeIdleTask();
-    }
-    
-    // Small delay to prevent excessive CPU usage
-    // This is the "idle" time when no tasks are running
-    delay(1);
+    // CPU can idle here or do other work
+    // The loop is no longer polling - it's event-driven by interrupt flags
 }
 
 #endif
+
 
