@@ -6,10 +6,6 @@
 #include <lcd_config.h>
 #include <Keypad.h>
 
-// Inline implementation of initWithConfig()
-// This is in a separate header so it can access project config files
-// Include this from your main source file, not from library code
-
 inline void KeypadLCDStdio::initWithConfig() {
     // Use the config headers for initialization
     init(

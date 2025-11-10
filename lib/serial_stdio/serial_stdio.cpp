@@ -1,6 +1,5 @@
 #include "serial_stdio.h"
 
-// Create a FILE structure to handle serial I/O
 static FILE serialStdio;
 static bool echoEnabled = true;
 

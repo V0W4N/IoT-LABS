@@ -1,0 +1,179 @@
+╔════════════════════════════════════════════════════════════════════╗
+║          Lab 3.1: Wiring Diagram - Stepper Motor Control          ║
+╚════════════════════════════════════════════════════════════════════╝
+
+COMPONENT CONNECTIONS:
+═══════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         ARDUINO UNO                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Digital Pins:              Analog Pins:        Power:              │
+│  ┌──────────────┐          ┌──────────┐        ┌──────┐            │
+│  │ D3  (STEP)   ├─────┐    │ A0 (POT) ├────┐   │ 5V   ├────┐       │
+│  │ D4  (DIR)    ├───┐ │    └──────────┘    │   │ GND  ├──┐ │       │
+│  │ D5  (ENABLE) ├─┐ │ │                    │   └──────┘  │ │       │
+│  └──────────────┘ │ │ │                    │             │ │       │
+└───────────────────┼─┼─┼────────────────────┼─────────────┼─┼───────┘
+                    │ │ │                    │             │ │
+                    │ │ │                    │             │ │
+┌───────────────────┼─┼─┼────────────────────┼─────────────┼─┼───────┐
+│                   │ │ │  A4988 DRIVER      │             │ │       │
+├───────────────────┼─┼─┼────────────────────┼─────────────┼─┼───────┤
+│                   │ │ │                    │             │ │       │
+│  Control Pins:    │ │ │  Logic Power:      │             │ │       │
+│  ┌────────────────┼─┼─┘  ┌─────────────────┼─────────────┼─┘       │
+│  │ ENABLE  ◄─────┘ │     │ VDD  ◄──────────┼─────────────┘         │
+│  │ STEP    ◄───────┘     │ GND  ◄──────────┘                       │
+│  │ DIR     ◄─────────────┘                                         │
+│  └───────────────┘        └─────────────────┐                      │
+│                                              │                      │
+│  Motor Power:         Motor Outputs:         │                      │
+│  ┌───────────────┐    ┌───────────────┐     │                      │
+│  │ VMOT (8-35V)  │    │ 1B ├───────┐  │     │                      │
+│  │ GND           │    │ 1A ├─────┐ │  │     │                      │
+│  └───────────────┘    │ 2A ├───┐ │ │  │     │                      │
+│                       │ 2B ├─┐ │ │ │  │     │                      │
+│                       └──────┼─┼─┼─┼──┘     │                      │
+└──────────────────────────────┼─┼─┼─┼────────┘                      │
+                               │ │ │ │                               │
+                        ┌──────┼─┼─┼─┼──────┐                        │
+                        │      │ │ │ │      │                        │
+┌───────────────────────┼──────┼─┼─┼─┼──────┼────────────────────────┐
+│                       │  STEPPER MOTOR     │                       │
+├───────────────────────┼──────┼─┼─┼─┼──────┼────────────────────────┤
+│                       │      │ │ │ │      │                       │
+│  Coil A:              │      │ │ │ │      │    Coil B:            │
+│  ┌────────────────────┼──────┼─┼─┘ │      │                       │
+│  │ A+  ◄──────────────┼──────┼─┘   │      │                       │
+│  │ A-  ◄──────────────┘      │     │      │                       │
+│  └───────────────────────────┘     │      │                       │
+│                                     │      │                       │
+│                      ┌──────────────┼──────┼─────────────┐         │
+│                      │ B+  ◄────────┼──────┘             │         │
+│                      │ B-  ◄────────┘                    │         │
+│                      └────────────────────────────────────┘         │
+└────────────────────────────────────────────────────────────────────┘
+
+
+┌────────────────────────────────────────────────────────────────────┐
+│                    POTENTIOMETER MODULE                            │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ┌─────────────┐                                                  │
+│  │ VCC  ◄──────┼──── 5V (from Arduino)                            │
+│  │ GND  ◄──────┼──── GND (from Arduino)                           │
+│  │ SIG  ◄──────┼──── A0 (to Arduino)                              │
+│  └─────────────┘                                                  │
+│                                                                    │
+│  Output: 0-5V analog voltage                                      │
+│  Resistance: 10kΩ (typical)                                       │
+└────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════
+PIN ASSIGNMENT TABLE:
+═══════════════════════════════════════════════════════════════════════
+
+Component         Pin Name       Arduino Pin    Signal Type
+────────────────────────────────────────────────────────────────────────
+A4988             STEP           D3             Digital Output (PWM)
+A4988             DIR            D4             Digital Output
+A4988             ENABLE         D5             Digital Output
+A4988             VDD            5V             Power
+A4988             GND            GND            Ground
+A4988             VMOT           12V (ext)      Motor Power Supply
+A4988             Motor GND      GND (ext)      Motor Ground
+
+Potentiometer     VCC            5V             Power
+Potentiometer     GND            GND            Ground
+Potentiometer     Signal         A0             Analog Input (0-5V)
+
+Stepper Motor     Coil A+        A4988-1A       Motor Winding
+Stepper Motor     Coil A-        A4988-1B       Motor Winding
+Stepper Motor     Coil B+        A4988-2A       Motor Winding
+Stepper Motor     Coil B-        A4988-2B       Motor Winding
+
+
+═══════════════════════════════════════════════════════════════════════
+POWER REQUIREMENTS:
+═══════════════════════════════════════════════════════════════════════
+
+Arduino Uno:      5V via USB or barrel jack (7-12V)
+A4988 Logic:      3-5.5V (powered from Arduino 5V)
+A4988 Motor:      8-35V (separate power supply recommended)
+Stepper Motor:    12V @ 1-2A (typical NEMA 17)
+Potentiometer:    5V @ <1mA
+
+IMPORTANT: Use separate power supply for motor (VMOT)!
+           Share common ground between Arduino and motor supply.
+
+
+═══════════════════════════════════════════════════════════════════════
+A4988 MICROSTEPPING CONFIGURATION:
+═══════════════════════════════════════════════════════════════════════
+
+MS1  MS2  MS3  |  Microstep Resolution
+─────────────────────────────────────────
+ L    L    L   |  Full step
+ H    L    L   |  Half step
+ L    H    L   |  Quarter step
+ H    H    L   |  Eighth step
+ H    H    H   |  Sixteenth step
+
+Default (all LOW): Full step mode (200 steps/rev)
+For this lab: Keep MS1, MS2, MS3 disconnected (pulled LOW internally)
+
+
+═══════════════════════════════════════════════════════════════════════
+SIGNAL TIMING:
+═══════════════════════════════════════════════════════════════════════
+
+STEP Pulse:       Minimum 1μs HIGH, 1μs LOW (handled by library)
+DIR Setup:        Minimum 200ns before STEP (handled by library)
+ENABLE:           Active LOW (LOW = motor ON, HIGH = motor OFF)
+
+
+═══════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING CHECKLIST:
+═══════════════════════════════════════════════════════════════════════
+
+□ All GND connections share common ground
+□ A4988 VDD connected to 5V (logic power)
+□ A4988 VMOT connected to motor power supply (8-35V)
+□ Motor coils connected correctly (check with multimeter for continuity)
+□ Potentiometer outputs 0-5V when turned (measure with multimeter)
+□ ENABLE pin LOW (motor enabled)
+□ Current limit adjusted on A4988 (use potentiometer on driver board)
+
+
+═══════════════════════════════════════════════════════════════════════
+CURRENT LIMIT ADJUSTMENT (A4988):
+═══════════════════════════════════════════════════════════════════════
+
+Measure VREF on A4988 potentiometer:
+    VREF = Current Limit / (8 × Rsense)
+
+For 1A current limit with 0.05Ω sense resistors:
+    VREF = 1A / (8 × 0.05Ω) = 2.5V
+
+Adjust small potentiometer on A4988 while measuring VREF.
+Start low and increase gradually to avoid overheating.
+
+
+═══════════════════════════════════════════════════════════════════════
+SAFETY NOTES:
+═══════════════════════════════════════════════════════════════════════
+
+⚠ Never disconnect motor while powered (can damage driver)
+⚠ Add heatsink to A4988 for continuous operation
+⚠ Use adequate power supply (>2A capacity for motor)
+⚠ Keep motor cables short to reduce EMI
+⚠ Add 100μF capacitor near A4988 VMOT for stability
+
+
+═══════════════════════════════════════════════════════════════════════
+End of Wiring Diagram
+═══════════════════════════════════════════════════════════════════════
+

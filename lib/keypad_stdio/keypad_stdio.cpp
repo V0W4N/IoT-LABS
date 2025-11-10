@@ -1,6 +1,5 @@
 #include "keypad_stdio.h"
 
-// Static member initialization
 Keypad* KeypadStdio::keypad = nullptr;
 bool KeypadStdio::blockingMode = true;  // Block by default
 
@@ -31,10 +30,9 @@ int KeypadStdio::getcharkeypad() {
         // Wait for a key press (blocking)
         while (key == NO_KEY) {
             key = keypad->getKey();
-            delay(10);  // Small delay to avoid busy loop
+            delay(10); 
         }
     } else {
-        // Non-blocking: return immediately
         key = keypad->getKey();
         if (key == NO_KEY) {
             return EOF;  // No key available

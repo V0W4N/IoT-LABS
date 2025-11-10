@@ -1,6 +1,5 @@
 #include "keypad_lcd_stdio.h"
 
-// Static member initialization
 FILE KeypadLCDStdio::keypadLCDStream;
 bool KeypadLCDStdio::echoKeys = true;  // Echo by default
 

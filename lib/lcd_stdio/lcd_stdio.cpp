@@ -1,6 +1,5 @@
 #include "lcd_stdio.h"
 
-// Static member initialization
 LiquidCrystal_I2C* LCDStdio::lcd = nullptr;
 uint8_t LCDStdio::lcdCols = 16;
 uint8_t LCDStdio::lcdRows = 2;
