@@ -1,6 +1,6 @@
 #include "my_btn.h"
 
-ButtonUtils::ButtonUtils(const int pin, const bool pullup)
+ButtonUtils::ButtonUtils(int pin, const bool pullup)
 : pullupMode(pullup), buttonPin(pin) {
     lastState       = pullup ? true : false;
     currentState    = pullup ? true : false;

@@ -1,26 +1,46 @@
 {
-  "version": 1,
-  "author": "V0W4N _",
-  "editor": "wokwi",
-  "parts": [
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0.6, "left": -0.6, "attrs": {} },
-    { "type": "wokwi-potentiometer", "id": "pot1", "top": 94.7, "left": 297.4, "attrs": {} },
-    {
-      "type": "wokwi-led-ring",
-      "id": "ring1",
-      "top": -81.11,
-      "left": 389.46,
-      "rotate": 90,
-      "attrs": { "pixels": "16" }
-    }
-  ],
-  "connections": [
-    [ "pot1:GND", "uno:GND.3", "black", [ "v48", "h-148" ] ],
-    [ "pot1:VCC", "uno:5V", "red", [ "v57.6", "h-187" ] ],
-    [ "pot1:SIG", "uno:A0", "gold", [ "v38.4", "h-129" ] ],
-    [ "ring1:VCC", "uno:5V", "red", [ "v0" ] ],
-    [ "uno:GND.1", "ring1:GND", "black", [ "v0" ] ],
-    [ "uno:6", "ring1:DIN", "green", [ "v0" ] ]
-  ],
-  "dependencies": {}
-}
+    "version": 1,
+    "author": "V0W4N _",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-arduino-mega", "id": "mega", "top": 0, "left": 0, "attrs": {} },
+      {
+        "type": "wokwi-slide-potentiometer",
+        "id": "pot1",
+        "top": 14.6,
+        "left": 431,
+        "attrs": { "travelLength": "30" }
+      },
+      { "type": "wokwi-relay-module", "id": "relay1", "top": -57.4, "left": 441.6, "attrs": {} },
+      { "type": "wokwi-vcc", "id": "vcc1", "top": -62.6, "left": 628.04, "rotate": 90, "attrs": {} },
+      {
+        "type": "wokwi-led",
+        "id": "led1",
+        "top": -128.4,
+        "left": 579.8,
+        "attrs": { "color": "red" }
+      },
+      { "type": "wokwi-gnd", "id": "gnd1", "top": 0, "left": 585, "attrs": {} },
+      {
+        "type": "wokwi-resistor",
+        "id": "r1",
+        "top": -63.8,
+        "left": 546.35,
+        "rotate": 270,
+        "attrs": { "value": "1000" }
+      }
+    ],
+    "connections": [
+      [ "pot1:GND", "mega:GND.4", "black", [ "v0" ] ],
+      [ "mega:5V.2", "pot1:VCC", "red", [ "v1.6", "h22.6", "v57.6" ] ],
+      [ "pot1:SIG", "mega:A15", "violet", [ "h-28.8", "v97.3" ] ],
+      [ "relay1:VCC", "mega:5V.1", "red", [ "h0" ] ],
+      [ "relay1:GND", "mega:GND.5", "black", [ "h-28.8", "v201.2" ] ],
+      [ "vcc1:VCC", "led1:A", "red", [ "v0" ] ],
+      [ "led1:C", "r1:2", "green", [ "v0" ] ],
+      [ "r1:1", "relay1:COM", "green", [ "h0" ] ],
+      [ "relay1:NO", "gnd1:GND", "green", [ "h0" ] ],
+      [ "relay1:IN", "mega:2", "green", [ "h0" ] ]
+    ],
+    "dependencies": {}
+  }

@@ -208,7 +208,7 @@ void TaskStatusDisplay(void *pvParameters) {
         // Simple output: Potentiometer and LED position
         printf("Pot: %4u (%1.2fV) | LED Position: %2u/%u\r\n", 
                rawAdc,
-               voltage,
+               (double) voltage,
                ledPos % LED_RING_PIXELS,
                LED_RING_PIXELS - 1);
         

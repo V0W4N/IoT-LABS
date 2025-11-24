@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "author": "V0W4N _",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0.6, "left": -0.6, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 94.7, "left": 297.4, "attrs": {} },
+    {
+      "type": "wokwi-led-ring",
+      "id": "ring1",
+      "top": -81.11,
+      "left": 389.46,
+      "rotate": 90,
+      "attrs": { "pixels": "16" }
+    }
+  ],
+  "connections": [
+    [ "pot1:GND", "uno:GND.3", "black", [ "v48", "h-148" ] ],
+    [ "pot1:VCC", "uno:5V", "red", [ "v57.6", "h-187" ] ],
+    [ "pot1:SIG", "uno:A0", "gold", [ "v38.4", "h-129" ] ],
+    [ "ring1:VCC", "uno:5V", "red", [ "v0" ] ],
+    [ "uno:GND.1", "ring1:GND", "black", [ "v0" ] ],
+    [ "uno:6", "ring1:DIN", "green", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

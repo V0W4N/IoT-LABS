@@ -5,13 +5,13 @@
 
 class ButtonUtils {
 protected:
-    const int buttonPin;
+    int buttonPin;
+    bool pullupMode;
     bool lastState;
     bool currentState;
-    const bool pullupMode;
 
 public:
-    explicit ButtonUtils(const int pin, const bool pullup = true);
+    explicit ButtonUtils(int pin, bool pullup = true);
     bool isPressed();
     bool btnPressed();
     bool btnUnPressed();
