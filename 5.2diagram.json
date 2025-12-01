@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "author": "V0W4N _",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-mega", "id": "mega", "top": -28.2, "left": -80.4, "attrs": {} },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": 208,
+      "left": 322.4,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-slide-potentiometer",
+      "id": "pot1",
+      "top": -4.6,
+      "left": 344.6,
+      "attrs": { "travelLength": "30" }
+    },
+    { "type": "wokwi-servo", "id": "servo1", "top": -155.6, "left": 326.4, "attrs": {} }
+  ],
+  "connections": [
+    [ "lcd1:GND", "mega:GND.3", "black", [ "h0" ] ],
+    [ "lcd1:VCC", "mega:5V", "red", [ "h0" ] ],
+    [ "lcd1:SDA", "mega:20", "green", [ "h0" ] ],
+    [ "lcd1:SCL", "mega:21", "green", [ "h0" ] ],
+    [ "pot1:VCC", "mega:5V.2", "red", [ "h0" ] ],
+    [ "pot1:GND", "mega:GND.5", "black", [ "v0" ] ],
+    [ "pot1:SIG", "mega:A0", "green", [ "h0" ] ],
+    [ "servo1:GND", "mega:GND.1", "black", [ "h0" ] ],
+    [ "servo1:V+", "mega:5V.2", "green", [ "h0" ] ],
+    [ "servo1:PWM", "mega:2", "green", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}

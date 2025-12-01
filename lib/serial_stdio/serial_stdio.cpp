@@ -14,7 +14,20 @@ int serialGetchar(FILE *file) {
     
     // Echo character back if echo is enabled
     if (echoEnabled && c != EOF) {
-        Serial.write(c);
+        // Handle backspace/delete specially for proper visual erasure
+        if (c == '\b' || c == 127) {
+            // Send backspace-space-backspace sequence to erase character visually
+            // This is standard terminal behavior:
+            // 1. Backspace moves cursor back
+            // 2. Space erases the character
+            // 3. Backspace moves cursor back again to correct position
+            Serial.write('\b');
+            Serial.write(' ');
+            Serial.write('\b');
+        } else {
+            // Echo regular characters normally
+            Serial.write(c);
+        }
     }
     
     return c;

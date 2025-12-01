@@ -13,11 +13,11 @@
 // #define LAB_2_2
 // #define LAB_3_1
 // #define LAB_3_2
- #define LAB_4_1
+// #define LAB_4_1
 // #define LAB_4_2
 // #define LAB_5_1
 // #define LAB_5_2
-// #define LAB_6_1
+ #define LAB_6_1
 // #define LAB_6_2
 // #define LAB_7_1
 // #define LAB_7_2

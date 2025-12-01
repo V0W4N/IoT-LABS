@@ -1,0 +1,41 @@
+{
+    "version": 1,
+    "author": "V0W4N _",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-arduino-mega", "id": "mega", "top": -28.2, "left": -80.4, "attrs": {} },
+      {
+        "type": "wokwi-stepper-motor",
+        "id": "stepper1",
+        "top": -227.87,
+        "left": 410.49,
+        "rotate": 90,
+        "attrs": { "size": "17" }
+      },
+      { "type": "wokwi-a4988", "id": "drv1", "top": -177.6, "left": 312, "attrs": {} },
+      {
+        "type": "wokwi-lcd1602",
+        "id": "lcd1",
+        "top": 208,
+        "left": 322.4,
+        "attrs": { "pins": "i2c" }
+      }
+    ],
+    "connections": [
+      [ "stepper1:A-", "drv1:2B", "green", [ "h0" ] ],
+      [ "stepper1:A+", "drv1:2A", "green", [ "h0" ] ],
+      [ "stepper1:B+", "drv1:1A", "green", [ "h0" ] ],
+      [ "stepper1:B-", "drv1:1B", "green", [ "h0" ] ],
+      [ "lcd1:GND", "mega:GND.3", "black", [ "h0" ] ],
+      [ "lcd1:VCC", "mega:5V", "red", [ "h0" ] ],
+      [ "lcd1:SDA", "mega:20", "green", [ "h0" ] ],
+      [ "lcd1:SCL", "mega:21", "green", [ "h0" ] ],
+      [ "drv1:STEP", "mega:3", "green", [ "h0" ] ],
+      [ "drv1:DIR", "mega:4", "green", [ "h0" ] ],
+      [ "drv1:ENABLE", "mega:5", "green", [ "h0" ] ],
+      [ "drv1:RESET", "drv1:SLEEP", "green", [ "h0" ] ],
+      [ "drv1:VDD", "mega:5V", "red", [ "h0" ] ],
+      [ "drv1:GND.1", "mega:GND.3", "black", [ "h0" ] ]
+    ],
+    "dependencies": {}
+  }
